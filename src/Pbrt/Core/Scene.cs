@@ -8,7 +8,7 @@ namespace Pbrt.Core
 
         public ICollection<Light> Lights { get; }
 
-        public Bounds WorldBounds { get; }
+        public Bounds3 WorldBounds { get; }
 
         public Scene(Primitive aggregate, ICollection<Light> lights)
         {
