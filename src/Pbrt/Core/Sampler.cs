@@ -6,7 +6,7 @@ namespace Pbrt.Core
     /// Responsible for choosing the points on the image plane from which rays are traced, 
     /// and supplying these sample positions to integrators
     /// </summary>
-    public class Sampler
+    public class Sampler // TODO: probably abstract class
     {
         /// <summary>
         /// Simple way to avoid making this class thread-safe
