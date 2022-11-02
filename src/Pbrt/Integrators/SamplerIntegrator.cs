@@ -1,5 +1,7 @@
 ﻿using Pbrt.Core;
 using System;
+using System.Collections.Generic;
+using System.Numerics;
 
 namespace Pbrt.Integrators
 {
@@ -18,7 +20,7 @@ namespace Pbrt.Integrators
         }
 
         // TODO: why not using the _sampler member?
-        public virtual void Preprocess(Scene scene, Sampler sampler)
+        protected virtual void Preprocess(Scene scene, Sampler sampler)
         {
             // do nothing by default, but can be overriden
         }
@@ -34,7 +36,14 @@ namespace Pbrt.Integrators
             // TODO
             // foreach tile
             //    Li()
+            
+            for (int i = 0; i<64; i++)
+            {
+                for (int j = 0; j<64; j++)
+                {
 
+                }
+            }
             throw new NotImplementedException();
         }
 

@@ -7,6 +7,8 @@ Obviously, this repository does not aim to match the quality or feature set avai
 
 # Book reading progress
 
+(First reading of the book)
+
 - [x] 1 Introduction
   - [x] 1.1 Literate Programming
   - [x] 1.2 Photorealistic Rendering and the Ray-Tracing Algorithm
@@ -16,17 +18,17 @@ Obviously, this repository does not aim to match the quality or feature set avai
   - [x] 1.6 Using and Understanding the Code
   - [x] 1.7 A Brief History of Physically Based Rendering
   
-- [ ] 2 Geometry and Transformations
+- [x] 2 Geometry and Transformations
   - [x] 2.1 Coordinate Systems
   - [x] 2.2 Vectors
   - [x] 2.3 Points
-  - [ ] 2.4 Normals
-  - [ ] 2.5 Rays
-  - [ ] 2.6 Bounding Boxes
-  - [ ] 2.7 Transformations
-  - [ ] 2.8 Applying Transformations
-  - [ ] 2.9 Animating Transformations
-  - [ ] 2.10 Interactions
+  - [x] 2.4 Normals
+  - [x] 2.5 Rays
+  - [x] 2.6 Bounding Boxes
+  - [x] 2.7 Transformations
+  - [x] 2.8 Applying Transformations
+  - [x] 2.9 Animating Transformations
+  - [x] 2.10 Interactions
 - [ ] 3 Shapes
   - [ ] 3.1 Basic Shape Interface
   - [ ] 3.2 Spheres
@@ -44,17 +46,17 @@ Obviously, this repository does not aim to match the quality or feature set avai
   - [ ] 4.4 Kd-Tree Accelerator
 
 - [ ] 5 Color and Radiometry
-  - [ ] 5.1 Spectral Representation
-  - [ ] 5.2 The SampledSpectrum Class
+  - [x] 5.1 Spectral Representation
+  - [x] 5.2 The SampledSpectrum Class
   - [ ] 5.3 RGBSpectrum Implementation
   - [ ] 5.4 Radiometry
   - [ ] 5.5 Working with Radiometric Integrals
   - [ ] 5.6 Surface Reflection
 - [ ] 6 Camera Models
-  - [ ] 6.1 Camera Model
+  - [x] 6.1 Camera Model
   - [ ] 6.2 Projective Camera Models
-  - [ ] 6.3 Environment Camera
-  - [ ] 6.4 Realistic Cameras
+  - [x] 6.3 Environment Camera
+  - [x] 6.4 Realistic Cameras
 - [ ] 7 Sampling and Reconstruction
   - [ ] 7.1 Sampling Theory
   - [ ] 7.2 Sampling Interface
@@ -125,3 +127,22 @@ Obviously, this repository does not aim to match the quality or feature set avai
   - [ ] 16.2 Stochastic Progressive Photon Mapping
   - [ ] 16.3 Bidirectional Path Tracing
   - [ ] 16.4 Metropolis Light Transport
+
+
+# Limitations
+To keep this project doable on a realistic time frame and avoid overambitious expectations, here is a (still growing) list of discarded content:
+- Anti-aliasing isn't supported
+	- The RayDifferential class is not implemented
+	- Cameras do not generate RayDifferentials
+- Volumetric scattering isn't supported
+	- The [Medium class](https://www.pbr-book.org/3ed-2018/Volume_Scattering/Media#) is not implemented
+	- [Rays](https://pbr-book.org/3ed-2018/Geometry_and_Transformations/Rays#) and [cameras](https://www.pbr-book.org/3ed-2018/Camera_Models/Camera_Model#) don't hold any reference to a medium
+	- The [MediumInteraction class](https://pbr-book.org/3ed-2018/Volume_Scattering/Media#MediumInteractions) is not implemented (the [SurfaceInteraction class](https://pbr-book.org/3ed-2018/Geometry_and_Transformations/Interactions#SurfaceInteraction) is the only interaction available)
+- [Animations](https://www.pbr-book.org/3ed-2018/Geometry_and_Transformations/Animating_Transformations#) are entirely discarded
+	- [Cameras](https://www.pbr-book.org/3ed-2018/Camera_Models/Camera_Model#) can't have motion blur
+- Spectral power distributions (SPD) are only represented by the [Spectrum class](https://www.pbr-book.org/3ed-2018/Color_and_Radiometry/Spectral_Representation#TheSpectrumType) implementing RGB sampling
+	- The RGBSpectrum and CoefficientSpectrum types don't exist, as they are merged into the Spectrum type
+	- The [SampledSpectrum class](https://www.pbr-book.org/3ed-2018/Color_and_Radiometry/The_SampledSpectrum_Class#) is not implemented
+- Only basic cameras are supported
+	- The [EnvironmentCamera class](https://www.pbr-book.org/3ed-2018/Camera_Models/Environment_Camera#) is not implemented
+	- [Realistic cameras](https://www.pbr-book.org/3ed-2018/Camera_Models/Realistic_Cameras#) are entirely discarded
