@@ -1,6 +1,6 @@
 ﻿using Pbrt.Core;
 using System;
-using System.Collections.Generic;
+using System.Drawing;
 using System.Numerics;
 
 namespace Pbrt.Integrators
@@ -10,8 +10,8 @@ namespace Pbrt.Integrators
     /// </summary>
     public abstract class SamplerIntegrator : IIntegrator
     {
-        private Sampler _sampler;
-        private Camera _camera;
+        protected Sampler _sampler;
+        protected Camera _camera;
 
         public SamplerIntegrator(Camera camera, Sampler sampler)
         {
@@ -29,24 +29,28 @@ namespace Pbrt.Integrators
         {
             Preprocess(scene, _sampler);
 
-            // Compute the number of tiles to use
-            // TODO: 16x16
-
-            // Render each tiles
-            // TODO
-            // foreach tile
-            //    Li()
+            // TODO: very naive implementation, see: https://pbr-book.org/3ed-2018/Introduction/pbrt_System_Overview#TheMainRenderingLoop
             
-            for (int i = 0; i<64; i++)
+            // FilmTile filmTile = camera->film->GetFilmTile(tileBounds);
+            for (int i = 0; i < _camera.Film.Resolution.Width; i++)
             {
-                for (int j = 0; j<64; j++)
+                for (int j = 0; j < _camera.Film.Resolution.Height; j++)
                 {
+                    //_sampler.Clone();
+                    var pixelCoord = new Point(i, j);
+                    _sampler.StartPixel(pixelCoord);
 
+                    Vector2 camSample = _sampler.GetCameraSample(pixelCoord);
+                    float rayWeight = _camera.GenerateRay(camSample, out Ray ray);
+
+                    Spectrum result = Li(ray, scene, _sampler) * rayWeight;
+                    // filmTile->AddSample(cameraSample.pFilm, L, rayWeight);
+                    _camera.Film.MergeFilmTile(pixelCoord, result);
                 }
             }
-            throw new NotImplementedException();
+            // camera->film->MergeFilmTile(filmTile);
         }
 
-        // public abstract Spectrum Li(RayDifferential ray, Scene scene, Camera camera, Sampler sampler, int depth = 0);
+        public abstract Spectrum Li(Ray ray, Scene scene, Sampler sampler, int depth = 0);
     }
 }

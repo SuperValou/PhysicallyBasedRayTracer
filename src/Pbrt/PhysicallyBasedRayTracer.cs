@@ -1,8 +1,10 @@
 ﻿using Pbrt.Cameras;
 using Pbrt.Core;
+using Pbrt.ImageIOs;
 using Pbrt.Integrators;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Numerics;
 
 namespace Pbrt
@@ -14,38 +16,23 @@ namespace Pbrt
             // TODO: well, initialize what needs to be initialized
         }
 
-        public void RenderScene()
+        public void RenderScene(string outputFilePath)
         {
-            Scene scene = CreateDefaultScene();
-            Camera camera = CreateDefaultCamera();
+            Scene scene = DefaultScene.CreateDefaultScene();
+            Camera camera = DefaultScene.CreateDefaultCamera();
 
             Sampler sampler = new Sampler();
             
-            SamplerIntegrator integrator = new WhittedIntegrator(camera, sampler);
+            IIntegrator integrator = new WhittedIntegrator(camera, sampler);
             integrator.Render(scene);
+
+            PngWriter.WriteImage(outputFilePath, camera.Film.GetPixels(), camera.Film.Resolution);
         }
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            // Do nothing so far
         }
 
-        // TODO: stub
-        private Scene CreateDefaultScene()
-        {
-            Primitive primitive = new Primitive();
-            var lights = new List<Light>();
-            Scene scene = new Scene(primitive, lights);
-            return scene;
-        }
-
-        // TODO: stub
-        private Camera CreateDefaultCamera()
-        {
-            var cameraPosition = new Vector3(-5, 0, 0);
-            var cameraTransform = Transform.FromTranslation(cameraPosition);
-            var film = new Film();
-            return new ProjectiveCamera(cameraTransform, film);
-        }
     }
 }

@@ -1,6 +1,4 @@
-﻿using Pbrt.Core;
-
-namespace Pbrt.Integrators
+﻿namespace Pbrt.Core
 {
     /// <summary>
     /// Interface in charge of rendering an image of the scene, 

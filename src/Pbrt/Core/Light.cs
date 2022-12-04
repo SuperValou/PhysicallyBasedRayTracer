@@ -8,5 +8,10 @@ namespace Pbrt.Core
         {
             throw new NotImplementedException();
         }
+
+        public Spectrum Le(Ray ray)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

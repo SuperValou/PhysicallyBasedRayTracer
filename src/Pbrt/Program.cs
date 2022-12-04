@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace Pbrt
 {
@@ -10,9 +11,14 @@ namespace Pbrt
         {            
             using (PhysicallyBasedRayTracer rayTracer = new PhysicallyBasedRayTracer())
             {
+                string outputFolder = args[0];
+                string outputFile = Path.Combine(outputFolder, "render.png");
                 rayTracer.Initialize();
-                rayTracer.RenderScene();
+                rayTracer.RenderScene(outputFile);                
             }
+
+            Console.WriteLine("Done.");
+            Console.ReadKey();
         }
     }
 }

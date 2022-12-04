@@ -4,16 +4,16 @@ namespace Pbrt.Core
 {
     public class Scene
     {
-        private Primitive _aggregate;
+        private IPrimitive _aggregate;
 
         public ICollection<Light> Lights { get; }
 
         public Bounds3 WorldBounds { get; }
 
-        public Scene(Primitive aggregate, ICollection<Light> lights)
+        public Scene(IPrimitive aggregate, ICollection<Light> lights)
         {
             _aggregate = aggregate;
-            WorldBounds = aggregate.WorldBounds;
+            WorldBounds = aggregate.GetWorldBounds();
 
             Lights = lights;
 

@@ -4,96 +4,143 @@ using System.Numerics;
 
 namespace Pbrt.Core
 {
+    // https://www.pbr-book.org/3ed-2018/Geometry_and_Transformations/Transformations
     public class Transform
     {
-        public Matrix4x4 Matrix { get; }
-        public Matrix4x4 InverseMatrix { get; }
+        public Matrix4x4 LocalToWorldMatrix { get; }
+        public Matrix4x4 WorldToLocalMatrix { get; }
 
-        public Transform Identity { get; } = new Transform(Matrix4x4.Identity);
+        public static Transform Identity { get; } = new Transform(Matrix4x4.Identity);
 
         public Transform(Matrix4x4 matrix)
         {
-            Matrix = matrix;            
+            LocalToWorldMatrix = matrix;            
             bool success = Matrix4x4.Invert(matrix, out Matrix4x4 invert);
             Debug.Assert(success);
-            InverseMatrix = invert;
+            WorldToLocalMatrix = invert;
         }
 
-        public Transform(Matrix4x4 matrix, Matrix4x4 invMatrix)
+        public Transform(Matrix4x4 matrix, Matrix4x4 inverseMatrix)
         {
-            Matrix = matrix;
-            InverseMatrix = invMatrix;
+            this.LocalToWorldMatrix = matrix;
+            this.WorldToLocalMatrix = inverseMatrix;
         }
 
         public bool SwapsHandedness()
         {
-            throw new NotImplementedException("See: https://www.pbr-book.org/3ed-2018/Geometry_and_Transformations/Applying_Transformations#TransformationsandCoordinateSystemHandedness");
+            // See: https://www.pbr-book.org/3ed-2018/Geometry_and_Transformations/Applying_Transformations#TransformationsandCoordinateSystemHandedness
+            float submatrixDeterminant = LocalToWorldMatrix.M11 * (LocalToWorldMatrix.M22 * LocalToWorldMatrix.M33 - LocalToWorldMatrix.M32 * LocalToWorldMatrix.M23)
+                                       - LocalToWorldMatrix.M21 * (LocalToWorldMatrix.M12 * LocalToWorldMatrix.M33 - LocalToWorldMatrix.M32 * LocalToWorldMatrix.M13)
+                                       + LocalToWorldMatrix.M31 * (LocalToWorldMatrix.M12 * LocalToWorldMatrix.M23 - LocalToWorldMatrix.M22 * LocalToWorldMatrix.M13);
+            return submatrixDeterminant < 0;
         }
 
-        public Vector3 ApplyToPoint(Vector3 position)
+        /// <summary>
+        /// Transforms position from local space to world space.
+        /// </summary>
+        public Vector3 TransformPoint(Vector3 localPosition)
         {
-            float x = position.X * Matrix.M11 + position.Y * Matrix.M21 + position.Z * Matrix.M31 + Matrix.M41;
-            float y = position.X * Matrix.M12 + position.Y * Matrix.M22 + position.Z * Matrix.M32 + Matrix.M42;
-            float z = position.X * Matrix.M13 + position.Y * Matrix.M23 + position.Z * Matrix.M33 + Matrix.M43;
-            float w = position.X * Matrix.M14 + position.Y * Matrix.M24 + position.Z * Matrix.M34 + Matrix.M44;
-            if (w != 1)
-            {
-                Debug.Assert(w != 0);
-                return new Vector3(x, y, z) / w;
-            }
-
-            return new Vector3(x, y, z);
+            return Vector3.Transform(localPosition, LocalToWorldMatrix);
         }
 
-        public Vector3 ApplyToVector(Vector3 vector)
+        /// <summary>
+        /// Transforms position from world space to local space.
+        /// </summary>
+        public Vector3 InverseTransformPoint(Vector3 worldPosition)
         {
-            // https://github.com/microsoft/referencesource/blob/dae14279dd0672adead5de00ac8f117dcf74c184/System.Numerics/System/Numerics/Vector3.cs#L332
-            //return new Vector3(
-            //    normal.X * matrix.M11 + normal.Y * matrix.M21 + normal.Z * matrix.M31,
-            //    normal.X * matrix.M12 + normal.Y * matrix.M22 + normal.Z * matrix.M32,
-            //    normal.X * matrix.M13 + normal.Y * matrix.M23 + normal.Z * matrix.M33);
-            return Vector3.TransformNormal(vector, Matrix);
+            return Vector3.Transform(worldPosition, WorldToLocalMatrix);
         }
 
-        public Vector3 ApplyToNormal(Vector3 normal)
+        /// <summary>
+        /// Transforms vector from local space to world space.
+        /// </summary>
+        public Vector3 TransformVector(Vector3 localVector)
         {
-            float x = normal.X * InverseMatrix.M11 + normal.Y * InverseMatrix.M12 + normal.Z * InverseMatrix.M13;
-            float y = normal.X * InverseMatrix.M21 + normal.Y * InverseMatrix.M22 + normal.Z * InverseMatrix.M23;
-            float z = normal.X * InverseMatrix.M31 + normal.Y * InverseMatrix.M32 + normal.Z * InverseMatrix.M33;
+            return Vector3.TransformNormal(localVector, LocalToWorldMatrix);
+        }
+
+        /// <summary>
+        /// Transforms vector from world space to local space.
+        /// </summary>
+        public Vector3 InverseTransformVector(Vector3 worldVector)
+        {
+            return Vector3.TransformNormal(worldVector, WorldToLocalMatrix);
+        }
+
+        /// <summary>
+        /// Transforms normal from local space to world space.
+        /// </summary>
+        public Vector3 TransformNormal(Vector3 localNormal)
+        {
+            float x = localNormal.X * WorldToLocalMatrix.M11 + localNormal.Y * WorldToLocalMatrix.M12 + localNormal.Z * WorldToLocalMatrix.M13;
+            float y = localNormal.X * WorldToLocalMatrix.M21 + localNormal.Y * WorldToLocalMatrix.M22 + localNormal.Z * WorldToLocalMatrix.M23;
+            float z = localNormal.X * WorldToLocalMatrix.M31 + localNormal.Y * WorldToLocalMatrix.M32 + localNormal.Z * WorldToLocalMatrix.M33;
             
             return new Vector3(x, y, z);
         }
 
-        public Ray ApplyToRay(Ray ray)
+        /// <summary>
+        /// Transforms ray from local space to world space.
+        /// </summary>
+        public Ray TransformRay(Ray localRay)
         {
-            Debug.Assert(ray != null);
-            var origin = this.ApplyToPoint(ray.Origin);
-            var direction = this.ApplyToVector(ray.Direction);
-            return new Ray(origin, direction, ray.TMax, ray.Time);
+            Debug.Assert(localRay != null);
+            var origin = this.TransformPoint(localRay.Origin);
+            var direction = this.TransformVector(localRay.Direction);
+            return new Ray(origin, direction, localRay.MaxRange);
         }
 
-        public Bounds3 ApplyToBounds(Bounds3 bounds)
+        /// <summary>
+        /// Transforms surface interaction from local space to world space.
+        /// </summary>
+        public SurfaceInteraction TransformSurfaceInteraction(SurfaceInteraction surfaceInteraction)
         {
-            throw new NotImplementedException("See: https://www.pbr-book.org/3ed-2018/Geometry_and_Transformations/Applying_Transformations#BoundingBoxes");
+            // See https://pbr-book.org/3ed-2018/Geometry_and_Transformations/Interactions#SurfaceInteraction
+
+            Vector3 point = this.TransformPoint(surfaceInteraction.Point);            
+            Vector3 direction = Vector3.Normalize(this.TransformVector(surfaceInteraction.Direction));
+            Vector2 uvs = surfaceInteraction.UV;            
+            Vector3 geoDpdu = this.TransformVector(surfaceInteraction.LocalGeometry.DpDu);
+            Vector3 geoDpdv = this.TransformVector(surfaceInteraction.LocalGeometry.DpDv);
+            Shape shape = surfaceInteraction.Shape;
+            
+            SurfaceInteraction result = new SurfaceInteraction(point, uvs, direction, geoDpdu, geoDpdv, shape);
+
+            Vector3 shadingDpdu = this.TransformVector(surfaceInteraction.ShadingGeometry.DpDu);
+            Vector3 shadingDpdv = this.TransformVector(surfaceInteraction.ShadingGeometry.DpDv);
+            result.SetShadingGeometry(shadingDpdu, shadingDpdv);
+
+            result.Primitive = surfaceInteraction.Primitive;
+            result.Bsdf = surfaceInteraction.Bsdf;
+            result.Bssrdf = surfaceInteraction.Bssrdf;
+
+            return result;
         }
 
-        public SurfaceInteraction ApplyToSurfaceInteraction(SurfaceInteraction surfaceInteraction)
+        public static Transform FromTranslation(float deltaX, float deltaY, float deltaZ)
         {
-            throw new NotImplementedException("See https://pbr-book.org/3ed-2018/Geometry_and_Transformations/Interactions#SurfaceInteraction");
+            return FromTranslation(new Vector3(deltaX, deltaY, deltaZ));
         }
 
-        // https://www.pbr-book.org/3ed-2018/Geometry_and_Transformations/Transformations#Translations
         public static Transform FromTranslation(Vector3 delta)
         {
-            return new Transform(Matrix4x4.CreateTranslation(delta));
+            Matrix4x4 matrix = Matrix4x4.CreateTranslation(delta);
+            return new Transform(matrix);
         }
 
-        // https://www.pbr-book.org/3ed-2018/Geometry_and_Transformations/Transformations#Scaling
+        public static Transform FromScaling(float xScale, float yScale, float zScale)
+        {
+            return FromScaling(new Vector3(xScale, yScale, zScale));
+        }
+
         public static Transform FromScaling(Vector3 scale)
         {
             return new Transform(Matrix4x4.CreateScale(scale));
         }
 
+        /// <summary>
+        /// Creates a clockwise rotation around the X-axis.
+        /// </summary>
         public static Transform FromRotationX(float degrees)
         {
             float radians = Mathf.DegToRad(degrees);
@@ -101,6 +148,9 @@ namespace Pbrt.Core
             return new Transform(matrix);
         }
 
+        /// <summary>
+        /// Creates a clockwise rotation around the Y-axis.
+        /// </summary>
         public static Transform FromRotationY(float degrees)
         {
             float radians = Mathf.DegToRad(degrees);
@@ -108,6 +158,9 @@ namespace Pbrt.Core
             return new Transform(matrix);
         }
 
+        /// <summary>
+        /// Creates a clockwise rotation around the Z-axis.
+        /// </summary>
         public static Transform FromRotationZ(float degrees)
         {
             float radians = Mathf.DegToRad(degrees);
@@ -115,7 +168,9 @@ namespace Pbrt.Core
             return new Transform(matrix);
         }
 
-        // https://www.pbr-book.org/3ed-2018/Geometry_and_Transformations/Transformations#RotationaroundanArbitraryAxis
+        /// <summary>
+        /// Creates a clockwise rotation around the given axis.
+        /// </summary>
         public static Transform FromRotationAroundAxis(float degrees, Vector3 axis)
         {
             float radians = Mathf.DegToRad(degrees);
@@ -126,16 +181,78 @@ namespace Pbrt.Core
         // https://www.pbr-book.org/3ed-2018/Geometry_and_Transformations/Transformations#TheLook-AtTransformation
         public static Transform FromLookAt(Vector3 cameraPosition, Vector3 target, Vector3 cameraUp)
         {            
-            Matrix4x4 matrix = Matrix4x4.CreateLookAt(cameraPosition, target, cameraUp);
-            return new Transform(matrix);
+            Matrix4x4 lookAtMatrix = Matrix4x4.CreateLookAt(cameraPosition, target, cameraUp);
+
+            // System.Numerics assumes right-handed coordinates system
+            var handednessSwapping = Matrix4x4.CreateScale(new Vector3(-1, 1, 1));
+            var matrix = handednessSwapping * lookAtMatrix;
+            Transform transform = new Transform(matrix);
+            return transform;
+        }
+
+        /// <summary>
+        /// Create a transform with the following properties: 
+        /// Z is 0 at the near plane and 1 at the far plane; 
+        /// X and Y lie between -1 and 1 in the direction in which the image is narrower, and the wider direction maps to a proportionally larger range. 
+        /// (0,0,0) is the center of the near plane.
+        /// </summary>
+        /// <param name="fov">Field of view in degrees.</param>                        
+        public static Transform FromPerspective(float fov, float aspectRatio, float nearPlaneDistance, float farPlaneDistance)
+        {
+            if (fov <= 0.0f || fov >= 180)
+            {
+                throw new ArgumentOutOfRangeException(nameof(fov));
+            }
+
+            if (aspectRatio <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(aspectRatio));
+            }
+
+            if (nearPlaneDistance <= 0.0f)
+            {
+                throw new ArgumentOutOfRangeException(nameof(nearPlaneDistance));
+            }
+
+            if (farPlaneDistance <= 0.0f)
+            {
+                throw new ArgumentOutOfRangeException(nameof(farPlaneDistance));
+            }
+
+            if (nearPlaneDistance >= farPlaneDistance)
+            {
+                throw new ArgumentOutOfRangeException(nameof(nearPlaneDistance));
+            }
+
+            // perspective transformation
+            float m33 = farPlaneDistance / (nearPlaneDistance - farPlaneDistance);
+            float m43 = -farPlaneDistance * nearPlaneDistance / (farPlaneDistance - nearPlaneDistance);
+            Matrix4x4 perspMatrix = new Matrix4x4(
+                m11: 1, m21: 0, m31: 0, m41: 0,
+                m12: 0, m22: 1, m32: 0, m42: 0,
+                m13: 0, m23: 0, m33: m33, m43: m43,
+                m14: 0, m24: 0, m34: 1, m44: 0);
+
+            // fov transformation
+            float yFovScale = 1f / MathF.Tan(Mathf.DegToRad(fov) * 0.5f);
+            float xFovScale = yFovScale / aspectRatio;
+            Matrix4x4 fovMatrix = Matrix4x4.CreateScale(new Vector3(xFovScale, yFovScale, 1));
+
+            Transform t = new Transform(fovMatrix * perspMatrix);
+            return t;
+        }
+
+        public static Transform Inverse(Transform transform)
+        {
+            Debug.Assert(transform != null);
+            return new Transform(transform.WorldToLocalMatrix, transform.LocalToWorldMatrix);
         }
 
         public static Transform operator *(Transform t1, Transform t2)
         {
-            Matrix4x4 matrix = Matrix4x4.Multiply(t1.Matrix, t2.Matrix);
-            Matrix4x4 invMatrix = Matrix4x4.Multiply(t2.InverseMatrix, t1.InverseMatrix);
-            return new Transform(matrix, invMatrix);
-            
+            Matrix4x4 matrix = t2.LocalToWorldMatrix * t1.LocalToWorldMatrix;
+            Matrix4x4 invMatrix = t2.WorldToLocalMatrix * t1.WorldToLocalMatrix;
+            return new Transform(matrix, invMatrix);            
         }
     }
 }

@@ -1,5 +1,7 @@
 # Physically-Based Ray Tracer
-**This is a learning project.** The main objective of this repository is to implement a small C# version of the physically-based ray tracer described in [Physically Based Rendering – From Theory to Implementation](https://www.pbr-book.org/). This book describes "both the mathematical theory behind a modern photorealistic rendering system as well as its practical implementation".
+**This is a learning project.** 
+
+The main objective of this repository is to implement a small C# version of the physically-based ray tracer described in [Physically Based Rendering – From Theory to Implementation](https://www.pbr-book.org/). This book describes "both the mathematical theory behind a modern photorealistic rendering system as well as its practical implementation".
 
 Obviously, this repository does not aim to match the quality or feature set available in the [official pbrt implementation](https://github.com/mmp/pbrt-v3). This project will be considered done once the following image can be rendered:
 
@@ -30,31 +32,31 @@ Obviously, this repository does not aim to match the quality or feature set avai
   - [x] 2.9 Animating Transformations
   - [x] 2.10 Interactions
 - [ ] 3 Shapes
-  - [ ] 3.1 Basic Shape Interface
-  - [ ] 3.2 Spheres
+  - [x] 3.1 Basic Shape Interface
+  - [x] 3.2 Spheres
   - [ ] 3.3 Cylinders
   - [ ] 3.4 Disks
   - [ ] 3.5 Other Quadrics
-  - [ ] 3.6 Triangle Meshes
+  - [x] 3.6 Triangle Meshes
   - [ ] 3.7 Curves
   - [ ] 3.8 Subdivision Surfaces
-  - [ ] 3.9 Managing Rounding Error
+  - [x] 3.9 Managing Rounding Error
 - [ ] 4 Primitives and Intersection Acceleration
-  - [ ] 4.1 Primitive Interface and Geometric Primitives
-  - [ ] 4.2 Aggregates
-  - [ ] 4.3 Bounding Volume Hierarchies
+  - [x] 4.1 Primitive Interface and Geometric Primitives
+  - [x] 4.2 Aggregates
+  - [x] 4.3 Bounding Volume Hierarchies
   - [ ] 4.4 Kd-Tree Accelerator
 
-- [ ] 5 Color and Radiometry
+- [x] 5 Color and Radiometry
   - [x] 5.1 Spectral Representation
   - [x] 5.2 The SampledSpectrum Class
-  - [ ] 5.3 RGBSpectrum Implementation
-  - [ ] 5.4 Radiometry
-  - [ ] 5.5 Working with Radiometric Integrals
-  - [ ] 5.6 Surface Reflection
-- [ ] 6 Camera Models
+  - [x] 5.3 RGBSpectrum Implementation
+  - [x] 5.4 Radiometry
+  - [x] 5.5 Working with Radiometric Integrals
+  - [x] 5.6 Surface Reflection
+- [x] 6 Camera Models
   - [x] 6.1 Camera Model
-  - [ ] 6.2 Projective Camera Models
+  - [x] 6.2 Projective Camera Models
   - [x] 6.3 Environment Camera
   - [x] 6.4 Realistic Cameras
 - [ ] 7 Sampling and Reconstruction
@@ -66,10 +68,10 @@ Obviously, this repository does not aim to match the quality or feature set avai
   - [ ] 7.6 Maximized Minimal Distance Sampler
   - [ ] 7.7 Sobol’ Sampler
   - [ ] 7.8 Image Reconstruction
-  - [ ] 7.9 Film and the Imaging Pipeline
+  - [x] 7.9 Film and the Imaging Pipeline
 
 - [ ] 8 Reflection Models
-  - [ ] 8.1 Basic Interface
+  - [x] 8.1 Basic Interface
   - [ ] 8.2 Specular Reflection and Transmission
   - [ ] 8.3 Lambertian Reflection
   - [ ] 8.4 Microfacet Models
@@ -130,19 +132,30 @@ Obviously, this repository does not aim to match the quality or feature set avai
 
 
 # Limitations
-To keep this project doable on a realistic time frame and avoid overambitious expectations, here is a (still growing) list of discarded content:
+To keep this project doable on a realistic time frame and avoid overambitious expectations, here is a (still growing) list of skipped content to improve iteration time:
 - Anti-aliasing isn't supported
 	- The RayDifferential class is not implemented
 	- Cameras do not generate RayDifferentials
+	- [Partial derivatives of normal vectors](https://www.pbr-book.org/3ed-2018/Shapes/Spheres#PartialDerivativesofNormalVectors) are not computed
 - Volumetric scattering isn't supported
-	- The [Medium class](https://www.pbr-book.org/3ed-2018/Volume_Scattering/Media#) is not implemented
+	- [Medium](https://www.pbr-book.org/3ed-2018/Volume_Scattering/Media#) is not implemented
 	- [Rays](https://pbr-book.org/3ed-2018/Geometry_and_Transformations/Rays#) and [cameras](https://www.pbr-book.org/3ed-2018/Camera_Models/Camera_Model#) don't hold any reference to a medium
-	- The [MediumInteraction class](https://pbr-book.org/3ed-2018/Volume_Scattering/Media#MediumInteractions) is not implemented (the [SurfaceInteraction class](https://pbr-book.org/3ed-2018/Geometry_and_Transformations/Interactions#SurfaceInteraction) is the only interaction available)
+	- [MediumInteraction](https://pbr-book.org/3ed-2018/Volume_Scattering/Media#MediumInteractions) is not implemented ([SurfaceInteraction](https://pbr-book.org/3ed-2018/Geometry_and_Transformations/Interactions#SurfaceInteraction) is the only interaction available)
 - [Animations](https://www.pbr-book.org/3ed-2018/Geometry_and_Transformations/Animating_Transformations#) are entirely discarded
 	- [Cameras](https://www.pbr-book.org/3ed-2018/Camera_Models/Camera_Model#) can't have motion blur
-- Spectral power distributions (SPD) are only represented by the [Spectrum class](https://www.pbr-book.org/3ed-2018/Color_and_Radiometry/Spectral_Representation#TheSpectrumType) implementing RGB sampling
+	- [TransformedPrimitives](https://www.pbr-book.org/3ed-2018/Primitives_and_Intersection_Acceleration/Primitive_Interface_and_Geometric_Primitives#TransformedPrimitive:ObjectInstancingandAnimatedPrimitives) are discarded
+- Spectral power distributions (SPD) are only represented by the [Spectrum class](https://www.pbr-book.org/3ed-2018/Color_and_Radiometry/Spectral_Representation#TheSpectrumType) implementing RGB sampling directly
 	- The RGBSpectrum and CoefficientSpectrum types don't exist, as they are merged into the Spectrum type
-	- The [SampledSpectrum class](https://www.pbr-book.org/3ed-2018/Color_and_Radiometry/The_SampledSpectrum_Class#) is not implemented
-- Only basic cameras are supported
-	- The [EnvironmentCamera class](https://www.pbr-book.org/3ed-2018/Camera_Models/Environment_Camera#) is not implemented
+	- [SampledSpectrum](https://www.pbr-book.org/3ed-2018/Color_and_Radiometry/The_SampledSpectrum_Class#) is not implemented
+- Only perspective cameras are supported
+	- [Orthographic Camera](https://www.pbr-book.org/3ed-2018/Camera_Models/Projective_Camera_Models#OrthographicCamera) is not implemented
+	- [EnvironmentCamera](https://www.pbr-book.org/3ed-2018/Camera_Models/Environment_Camera#) is not implemented
 	- [Realistic cameras](https://www.pbr-book.org/3ed-2018/Camera_Models/Realistic_Cameras#) are entirely discarded
+	- [Camera sampling](https://pbr-book.org/3ed-2018/Camera_Models/Camera_Model#) is reduced to a Vector2 holding the film coordinates being sampled
+- [Sampling](https://pbr-book.org/3ed-2018/Sampling_and_Reconstruction/Sampling_Theory#) is currently dumbed down to sampling directly at the exact pixel position
+- [Shape intersection](https://www.pbr-book.org/3ed-2018/Shapes/Basic_Shape_Interface#IntersectionTests) tests do not support cutting away some of the shape surfaces using a texture
+- Shapes are simplified
+	- Sphere are always full (they can't be partial sweeps)
+- [Error analysis](https://www.pbr-book.org/3ed-2018/Shapes/Managing_Rounding_Error#) on float arithmetic is ignored
+- The only Acceleration Structures implemented is a Kd-Tree
+	- [Bounding Volume Hierarchies](https://www.pbr-book.org/3ed-2018/Primitives_and_Intersection_Acceleration/Bounding_Volume_Hierarchies#) are skipped
